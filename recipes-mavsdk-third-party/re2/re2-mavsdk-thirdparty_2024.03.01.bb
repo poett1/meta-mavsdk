@@ -10,7 +10,7 @@ SRC_URI = "git://github.com/google/re2.git;branch=main;protocol=https"
 
 S = "${WORKDIR}/git"
 
-DEPENDS = "abseil-cpp-mavsdk-thirdparty"
+DEPENDS = "abseil-cpp"
 
 inherit cmake
 

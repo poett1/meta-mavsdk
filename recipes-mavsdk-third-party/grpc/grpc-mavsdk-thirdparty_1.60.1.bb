@@ -6,12 +6,12 @@ SECTION = "libs"
 LICENSE = "Apache-2.0 & BSD-3-Clause & MPL-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=731e401b36f8077ae0c134b59be5c906"
 
-DEPENDS = "c-ares-mavsdk-thirdparty protobuf-mavsdk-thirdparty protobuf-mavsdk-thirdparty-native openssl-mavsdk-thirdparty libnsl2 \
-abseil-cpp-mavsdk-thirdparty re2-mavsdk-thirdparty zlib-mavsdk-thirdparty \
+DEPENDS = "c-ares protobuf-mavsdk-thirdparty protobuf-mavsdk-thirdparty-native openssl libnsl2 \
+abseil-cpp re2 zlib \
 "
 INSANE_SKIP:${PN} += "installed-vs-shipped"
 
-DEPENDS:append:class-target = " googletest-mavsdk-thirdparty grpc-mavsdk-thirdparty-native "
+DEPENDS:append:class-target = " gtest grpc-mavsdk-thirdparty-native "
 DEPENDS:append:class-nativesdk = " grpc-mavsdk-thirdparty-native "
 
 PACKAGE_BEFORE_PN = "${PN}-compiler"

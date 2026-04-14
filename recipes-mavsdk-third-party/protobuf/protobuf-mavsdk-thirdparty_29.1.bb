@@ -7,7 +7,7 @@ SECTION = "console/tools"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=37b5762e07f0af8c74ce80a8bda4266b"
 
-DEPENDS = "zlib-mavsdk-thirdparty abseil-cpp-mavsdk-thirdparty"
+DEPENDS = "zlib abseil-cpp"
 DEPENDS:append:class-target = " protobuf-mavsdk-thirdparty-native"
 
 SRCREV = "796e49f6ca82f763d1087d2ff7355d2f0d7b71b1"
