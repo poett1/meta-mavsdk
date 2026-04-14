@@ -19,4 +19,4 @@ DEPENDS += "python3-pymavlink-native"
 
 inherit cmake
 
-EXTRA_OECMAKE = ""
+EXTRA_OECMAKE += "-DMAVLINK_DIALECT=ardupilotmega"
