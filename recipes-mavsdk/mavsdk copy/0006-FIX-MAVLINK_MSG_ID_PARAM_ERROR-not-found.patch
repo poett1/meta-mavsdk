@@ -1,0 +1,69 @@
+From 43ff0c61a51d85d9c7cd00696c729a81efcf1785 Mon Sep 17 00:00:00 2001
+From: Patrick Oetken <patrick@wargdrones.com>
+Date: Thu, 2 Apr 2026 15:05:34 +0200
+Subject: [PATCH] FIX: MAVLINK_MSG_ID_PARAM_ERROR not found
+
+---
+ src/mavsdk/core/mavlink_parameter_client.cpp | 6 ++++++
+ src/mavsdk/core/mavlink_parameter_server.cpp | 6 ++++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/src/mavsdk/core/mavlink_parameter_client.cpp b/src/mavsdk/core/mavlink_parameter_client.cpp
+index 1a8b9aec..4585d5cd 100644
+--- a/src/mavsdk/core/mavlink_parameter_client.cpp
++++ b/src/mavsdk/core/mavlink_parameter_client.cpp
+@@ -58,10 +58,12 @@ MavlinkParameterClient::MavlinkParameterClient(
+             this);
+ 
+         // PARAM_ERROR is only for standard protocol (not extended)
++#ifdef MAVLINK_MSG_ID_PARAM_ERROR
+         _message_handler.register_one(
+             MAVLINK_MSG_ID_PARAM_ERROR,
+             [this](const mavlink_message_t& message) { process_param_error(message); },
+             this);
++#endif
+     }
+ }
+ 
+@@ -1059,6 +1061,7 @@ void MavlinkParameterClient::process_param_ext_ack(const mavlink_message_t& mess
+ 
+ void MavlinkParameterClient::process_param_error(const mavlink_message_t& message)
+ {
++#ifdef MAVLINK_MSG_ID_PARAM_ERROR
+     mavlink_param_error_t param_error;
+     mavlink_msg_param_error_decode(&message, &param_error);
+     const auto safe_param_id = extract_safe_param_id(param_error.param_id);
+@@ -1138,6 +1141,9 @@ void MavlinkParameterClient::process_param_error(const mavlink_message_t& messag
+             },
+             [&](WorkItemGetAll&) { LogWarn() << "Unexpected PARAM_ERROR response for GetAll."; }},
+         work->work_item_variant);
++#else
++    (void)message;
++#endif
+ }
+ 
+ void MavlinkParameterClient::receive_timeout()
+diff --git a/src/mavsdk/core/mavlink_parameter_server.cpp b/src/mavsdk/core/mavlink_parameter_server.cpp
+index 0d53982d..befd4d98 100644
+--- a/src/mavsdk/core/mavlink_parameter_server.cpp
++++ b/src/mavsdk/core/mavlink_parameter_server.cpp
+@@ -593,6 +593,7 @@ void MavlinkParameterServer::do_work()
+ void MavlinkParameterServer::send_param_error(
+     const std::string& param_id, int16_t param_index, uint8_t error_code)
+ {
++#ifdef MAVLINK_MSG_ID_PARAM_ERROR
+     if (_parameter_debugging) {
+         LogDebug() << "Sending PARAM_ERROR for " << param_id << " (index: " << param_index
+                    << ") with error code: " << (int)error_code;
+@@ -616,6 +617,11 @@ void MavlinkParameterServer::send_param_error(
+         })) {
+         LogErr() << "Error: Send PARAM_ERROR message failed";
+     }
++#else
++    (void)param_id;
++    (void)param_index;
++    (void)error_code;
++#endif
+ }
+ 
+ std::ostream& operator<<(std::ostream& str, const MavlinkParameterServer::Result& result)

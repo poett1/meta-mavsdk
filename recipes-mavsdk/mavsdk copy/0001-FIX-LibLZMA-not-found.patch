@@ -1,0 +1,26 @@
+From 69ec532989dc0f3eb41be7cf23933d219175336d Mon Sep 17 00:00:00 2001
+From: Patrick Oetken <patrick@wargdrones.com>
+Date: Thu, 2 Apr 2026 14:56:52 +0200
+Subject: [PATCH] FIX: LibLZMA not found
+
+---
+ src/CMakeLists.txt | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index e7f93786..4a7cc625 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -44,11 +44,8 @@ message(STATUS "CMAKE_FIND_ROOT_PATHS: ${CMAKE_FIND_ROOT_PATH}")
+ if(NOT BUILD_WITHOUT_CURL)
+     find_package(CURL REQUIRED)
+ endif()
+-if (CMAKE_CROSSCOMPILING)
+-    find_package(LibLZMA HINTS "${CMAKE_PREFIX_PATH}" REQUIRED)
+-else()
++
+     find_package(LibLZMA REQUIRED)
+-endif()
+ 
+ if(BUILD_TESTING AND (IOS OR ANDROID))
+     message(STATUS "Building for iOS or Android: forcing BUILD_TESTING to FALSE...")

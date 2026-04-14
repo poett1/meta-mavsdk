@@ -1,0 +1,157 @@
+From d489bf61448c5c65f2db955c64d4e1b4c27f4796 Mon Sep 17 00:00:00 2001
+From: Patrick Oetken <patrick@wargdrones.com>
+Date: Thu, 2 Apr 2026 15:05:01 +0200
+Subject: [PATCH] FIX: mavlink headers not found
+
+---
+ src/mavsdk/core/CMakeLists.txt                | 93 ++++++++++++++++---
+ .../core/include/mavsdk/mavlink_include.h.in  |  4 +-
+ 2 files changed, 81 insertions(+), 16 deletions(-)
+
+diff --git a/src/mavsdk/core/CMakeLists.txt b/src/mavsdk/core/CMakeLists.txt
+index febec620..7fa1300a 100644
+--- a/src/mavsdk/core/CMakeLists.txt
++++ b/src/mavsdk/core/CMakeLists.txt
+@@ -1,22 +1,85 @@
+ set(THREADS_PREFER_PTHREAD_FLAG ON)
+ find_package(Threads REQUIRED)
+ 
+-find_package(MAVLink REQUIRED)
++find_package(MAVLink QUIET CONFIG)
++find_package(mavlink QUIET CONFIG)
+ 
+-get_target_property(
+-    MAVLINK_INCLUDE_DIR
+-    MAVLink::mavlink
+-    INTERFACE_INCLUDE_DIRECTORIES
+-)
++set(MAVLINK_INCLUDE_DIRS_CANDIDATES "")
++
++if(TARGET MAVLink::mavlink)
++    get_target_property(
++        MAVLINK_INCLUDE_DIRS_FROM_TARGET
++        MAVLink::mavlink
++        INTERFACE_INCLUDE_DIRECTORIES
++    )
++    list(APPEND MAVLINK_INCLUDE_DIRS_CANDIDATES ${MAVLINK_INCLUDE_DIRS_FROM_TARGET})
++endif()
++
++if(mavlink_FOUND)
++    list(APPEND MAVLINK_INCLUDE_DIRS_CANDIDATES ${mavlink_INCLUDE_DIRS})
++endif()
++
++# In Yocto/ROS builds, mavlink headers can be staged under the target sysroot
++# (e.g. /opt/ros/humble/include) without a discoverable CMake package prefix.
++if(CMAKE_SYSROOT)
++    list(APPEND MAVLINK_INCLUDE_DIRS_CANDIDATES
++        "${CMAKE_SYSROOT}/usr/include"
++        "${CMAKE_SYSROOT}/opt/ros/humble/include"
++    )
++endif()
++
++if(DEFINED ENV{RECIPE_SYSROOT})
++    list(APPEND MAVLINK_INCLUDE_DIRS_CANDIDATES
++        "$ENV{RECIPE_SYSROOT}/usr/include"
++        "$ENV{RECIPE_SYSROOT}/opt/ros/humble/include"
++    )
++endif()
++
++foreach(_root ${CMAKE_FIND_ROOT_PATH})
++    list(APPEND MAVLINK_INCLUDE_DIRS_CANDIDATES
++        "${_root}/usr/include"
++        "${_root}/opt/ros/humble/include"
++    )
++endforeach()
++
++list(REMOVE_DUPLICATES MAVLINK_INCLUDE_DIRS_CANDIDATES)
++
++set(MAVLINK_HEADER_PREFIX "")
++set(MAVLINK_HEADER_INCLUDE_DIR "")
++
++foreach(_inc_dir ${MAVLINK_INCLUDE_DIRS_CANDIDATES})
++    if(EXISTS "${_inc_dir}/mavlink/${MAVLINK_DIALECT}/mavlink.h")
++        set(MAVLINK_HEADER_PREFIX "mavlink")
++        set(MAVLINK_HEADER_INCLUDE_DIR "${_inc_dir}")
++        break()
++    elseif(EXISTS "${_inc_dir}/mavlink/v2.0/${MAVLINK_DIALECT}/mavlink.h")
++        set(MAVLINK_HEADER_PREFIX "mavlink/v2.0")
++        set(MAVLINK_HEADER_INCLUDE_DIR "${_inc_dir}")
++        break()
++    endif()
++endforeach()
++
++if(NOT MAVLINK_HEADER_PREFIX)
++    message(FATAL_ERROR "Could not locate MAVLink headers for dialect '${MAVLINK_DIALECT}'. Checked include roots: ${MAVLINK_INCLUDE_DIRS_CANDIDATES}")
++endif()
++
++target_include_directories(mavsdk PUBLIC ${MAVLINK_HEADER_INCLUDE_DIR})
+ 
+ configure_file(version.h.in version.h)
+ configure_file(include/mavsdk/mavlink_include.h.in include/mavsdk/mavlink_include.h)
+ 
+ # Generate embedded XML header for libmav
+ if(NOT MAVLINK_XML_PATH)
+-    # Derive from MAVLINK_INCLUDE_DIR which is set by find_package(MAVLink)
+-    # MAVLINK_INCLUDE_DIR points to .../include, so we append mavlink/message_definitions/v1.0
+-    set(MAVLINK_XML_PATH "${MAVLINK_INCLUDE_DIR}/mavlink/message_definitions/v1.0")
++    foreach(_inc_dir ${MAVLINK_INCLUDE_DIRS_CANDIDATES})
++        if(EXISTS "${_inc_dir}/mavlink/message_definitions/v1.0/common.xml")
++            set(MAVLINK_XML_PATH "${_inc_dir}/mavlink/message_definitions/v1.0")
++            break()
++        endif()
++    endforeach()
++
++    if(NOT MAVLINK_XML_PATH)
++        message(FATAL_ERROR "Could not locate MAVLink XML definitions in include roots: ${MAVLINK_INCLUDE_DIRS_CANDIDATES}")
++    endif()
+ endif()
+ 
+ set(MAVLINK_MINIMAL_XML "${MAVLINK_XML_PATH}/minimal.xml")
+@@ -119,7 +182,7 @@ if (NOT BUILD_WITHOUT_CURL)
+     )
+ 
+     target_link_libraries(mavsdk
+-        PRIVATE
++        PUBLIC
+         CURL::libcurl
+     )
+ 
+@@ -181,7 +244,7 @@ target_include_directories(mavsdk
+     PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/mavsdk>
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/mavsdk>
+-    $<BUILD_INTERFACE:${MAVLINK_INCLUDE_DIR}>
++    $<BUILD_INTERFACE:${MAVLINK_HEADER_INCLUDE_DIR}>
+     $<INSTALL_INTERFACE:include>
+     PRIVATE
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+@@ -223,9 +286,11 @@ install(FILES
+     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/mavsdk"
+ )
+ 
+-install(DIRECTORY ${MAVLINK_INCLUDE_DIR}/mavlink
+-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/mavsdk"
+-)
++if(EXISTS "${MAVLINK_HEADER_INCLUDE_DIR}/mavlink")
++    install(DIRECTORY ${MAVLINK_HEADER_INCLUDE_DIR}/mavlink
++        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/mavsdk"
++    )
++endif()
+ 
+ list(APPEND UNIT_TEST_SOURCES
+     ${PROJECT_SOURCE_DIR}/mavsdk/core/callback_list_test.cpp
+diff --git a/src/mavsdk/core/include/mavsdk/mavlink_include.h.in b/src/mavsdk/core/include/mavsdk/mavlink_include.h.in
+index 4158309c..0786e639 100644
+--- a/src/mavsdk/core/include/mavsdk/mavlink_include.h.in
++++ b/src/mavsdk/core/include/mavsdk/mavlink_include.h.in
+@@ -1,8 +1,8 @@
+ #pragma once
+ 
+-#include "mavlink/mavlink_types.h"
++#include "@MAVLINK_HEADER_PREFIX@/mavlink_types.h"
+ 
+ #define MAVLINK_GET_CHANNEL_STATUS
+ mavlink_status_t* mavlink_get_channel_status(uint8_t chan);
+ 
+-#include "mavlink/@MAVLINK_DIALECT@/mavlink.h"
++#include "@MAVLINK_HEADER_PREFIX@/@MAVLINK_DIALECT@/mavlink.h"
