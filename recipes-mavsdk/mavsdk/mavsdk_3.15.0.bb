@@ -1,6 +1,5 @@
-LICENSE = "BSD-3-Clause & Unknown"
-LIC_FILES_CHKSUM = "file://LICENSE.md;md5=84b641454775df91a2bae8fdd450e2e9 \
-                    file://debian/copyright;md5=40d669a2ad31adadbe5505defc10fbcc"
+LICENSE = "BSD-3-Clause"
+LIC_FILES_CHKSUM = "file://LICENSE.md;md5=84b641454775df91a2bae8fdd450e2e9"
 
 # This does not work because github.com/ryanf55/MAVSDK-Proto is added as a submodule in MAVSDK, but 
 # github.com/mavlink/MAVSDK-Proto must be used. Since we are not using superbuild, we can leave out the submodule and just add a patch to fix the URL.
