@@ -2,6 +2,7 @@ From 59691a3f2a1696c160b020867be54b800d860206 Mon Sep 17 00:00:00 2001
 From: Piotr Betlej <piotr.betlej@googlemail.com>
 Date: Mon, 27 Oct 2025 16:14:15 +0100
 Subject: [PATCH] Pymavlink as yocto dependency
+Upstream-Status: Inappropriate [oe-specific]
 
 Message_definitions installed into include directory
 ---

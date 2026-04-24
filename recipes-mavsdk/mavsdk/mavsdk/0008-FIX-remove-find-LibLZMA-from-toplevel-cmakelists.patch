@@ -2,6 +2,7 @@ From 88cd2a73a62f5f43480102a9794df76b3e6f5f7e Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 15:07:19 +0200
 Subject: [PATCH] FIX: remove find LibLZMA from toplevel cmakelists
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/CMakeLists.txt | 2 +-

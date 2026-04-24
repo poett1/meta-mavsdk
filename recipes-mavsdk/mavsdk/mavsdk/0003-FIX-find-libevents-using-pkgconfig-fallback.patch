@@ -2,6 +2,7 @@ From a197162233428fd3f6469b8905d1f02c335c1220 Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 15:02:56 +0200
 Subject: [PATCH] FIX: find libevents using pkgconfig fallback
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/MAVSDKConfig.cmake.in |  7 ++++++-

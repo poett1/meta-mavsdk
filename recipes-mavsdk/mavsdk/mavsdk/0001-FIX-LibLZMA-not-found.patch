@@ -2,6 +2,7 @@ From 69ec532989dc0f3eb41be7cf23933d219175336d Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 14:56:52 +0200
 Subject: [PATCH] FIX: LibLZMA not found
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/CMakeLists.txt | 5 +----

@@ -2,6 +2,7 @@ From 43ff0c61a51d85d9c7cd00696c729a81efcf1785 Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 15:05:34 +0200
 Subject: [PATCH] FIX: MAVLINK_MSG_ID_PARAM_ERROR not found
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/mavsdk/core/mavlink_parameter_client.cpp | 6 ++++++

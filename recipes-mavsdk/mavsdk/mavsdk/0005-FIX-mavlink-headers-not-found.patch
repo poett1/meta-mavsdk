@@ -2,6 +2,7 @@ From d489bf61448c5c65f2db955c64d4e1b4c27f4796 Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 15:05:01 +0200
 Subject: [PATCH] FIX: mavlink headers not found
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/mavsdk/core/CMakeLists.txt                | 93 ++++++++++++++++---

@@ -2,6 +2,7 @@ From 4b5d6dad79155e1b9b2fd4520af7152132b80677 Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 15:03:30 +0200
 Subject: [PATCH] FIX: find picosha2 quiet
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/MAVSDKConfig.cmake.in | 2 +-

@@ -2,6 +2,7 @@ From 56027862b5f4e70f7914891d0ac511faf08a8df6 Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 15:06:47 +0200
 Subject: [PATCH] FIX: remove fixed protobuf version from mavsdk-server
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/mavsdk_server/src/generated/action/action.pb.h         | 7 +------

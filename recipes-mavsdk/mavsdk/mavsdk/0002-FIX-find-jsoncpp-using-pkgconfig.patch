@@ -2,6 +2,7 @@ From 70aaf72ff2deec901dca92d58c73a4ad3a490061 Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick@wargdrones.com>
 Date: Thu, 2 Apr 2026 14:58:23 +0200
 Subject: [PATCH] FIX: find jsoncpp using pkgconfig
+Upstream-Status: Inappropriate [oe-specific]
 
 ---
  src/mavsdk/CMakeLists.txt | 5 +++--
