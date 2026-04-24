@@ -13,7 +13,7 @@ inherit cmake pkgconfig
 
 # allow for shared libraries, but do not default to them
 #
-DISABLE_STATIC :=""
+DISABLE_STATIC = ""
 PACKAGECONFIG[shared] = "-DBUILD_SHARED_LIBS=ON,-DBUILD_SHARED_LIBS=OFF,,"
 
 CXXFLAGS:append = " -fPIC"
