@@ -32,7 +32,7 @@ SRC_URI:append:class-nativesdk = " \
 
 SRC_URI[sha256sum] = "6fea2aac6a4610fbd0400afb0bcddbe7258a64c63f1f68e5855ebc0c659710cd"
 
-S = "${WORKDIR}/curl-${PV}"
+S = "${UNPACKDIR}/curl-${PV}"
 
 # Curl has used many names over the years...
 CVE_PRODUCT = "haxx:curl haxx:libcurl curl:curl curl:libcurl libcurl:libcurl daniel_stenberg:curl"

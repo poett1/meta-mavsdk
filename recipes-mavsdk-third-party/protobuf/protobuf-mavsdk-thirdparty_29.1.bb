@@ -18,8 +18,6 @@ SRC_URI = "gitsm://github.com/protocolbuffers/protobuf.git;branch=29.x;protocol=
 SRC_URI:append:mips:toolchain-clang = " file://0001-Fix-build-on-mips-clang.patch "
 SRC_URI:append:mipsel:toolchain-clang = " file://0001-Fix-build-on-mips-clang.patch "
 
-S = "${WORKDIR}/git"
-
 CVE_STATUS[CVE-2024-7254] = "fixed-version: The vulnerability has been addressed and the fix is included in version v4.25.8"
 
 inherit cmake pkgconfig 

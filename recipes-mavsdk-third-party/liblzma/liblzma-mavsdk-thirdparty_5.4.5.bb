@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=c8ea84ebe7b93cce676b54355dc6b2c0 \
 SRC_URI = "https://github.com/tukaani-project/xz/releases/download/v${PV}/xz-${PV}.tar.gz"
 SRC_URI[sha256sum] = "135c90b934aee8fbc0d467de87a05cb70d627da36abe518c357a873709e5b7d6"
 
-S = "${WORKDIR}/xz-${PV}"
+S = "${UNPACKDIR}/xz-${PV}"
 
 inherit cmake
 

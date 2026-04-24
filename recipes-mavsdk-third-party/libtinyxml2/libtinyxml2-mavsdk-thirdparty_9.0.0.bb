@@ -11,8 +11,6 @@ SRC_URI += "file://cmake-3.10.2.patch file://no-lfs64.patch"
 
 SRCREV = "1dee28e51f9175a31955b9791c74c430fe13dc82"
 
-S = "${WORKDIR}/git"
-
 inherit cmake
 
 BBCLASSEXTEND = "native"

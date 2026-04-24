@@ -23,5 +23,3 @@ PACKAGE_BEFORE_PN = "${PN}-utils"
 FILES:${PN}-utils = "${bindir}"
 
 BBCLASSEXTEND = "native nativesdk"
-
-S = "${WORKDIR}/git"

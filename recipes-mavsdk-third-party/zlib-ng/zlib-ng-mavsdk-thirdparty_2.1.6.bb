@@ -17,8 +17,6 @@ SRC_URI = "git://github.com/zlib-ng/zlib-ng;protocol=https;branch=stable"
 PV = "2.1.6"
 SRCREV = "74253725f884e2424a0dd8ae3f69896d5377f325"
 
-S = "${WORKDIR}/git"
-
 # NOTE: unable to map the following CMake package dependencies: GTest benchmark
 DEPENDS = "libpng"
 

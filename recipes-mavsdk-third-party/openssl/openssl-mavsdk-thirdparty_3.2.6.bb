@@ -20,7 +20,7 @@ SRC_URI:append:class-nativesdk = " \
 
 SRC_URI[sha256sum] = "89681a9ddaa9ed7cf25ea8ef61338db805200bae47d00510490623547380c148"
 
-S = "${WORKDIR}/openssl-${PV}"
+# S = "${WORKDIR}/openssl-${PV}"
 # Enable static
 DISABLE_STATIC := ""
 

@@ -6,7 +6,6 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=cbbd27594afd089daa160d3a16dd515a"
 
 PACKAGES = "${PN} ${PN}-dbg ${PN}-staticdev ${PN}-dev"
 
-S = "${WORKDIR}/git"
 SRCREV = "f8d7d77c06936315286eb55f8de22cd23c188571"
 SRC_URI = "git://github.com/google/googletest.git;branch=main;protocol=https"
 

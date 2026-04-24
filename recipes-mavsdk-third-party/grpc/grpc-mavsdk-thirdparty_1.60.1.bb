@@ -23,7 +23,6 @@ RDEPENDS:${PN}-dev:append:class-native = " ${PN}-compiler"
 # Both dependencies are mutually exclusive
 # RDEPENDS:${PN}-dev += "${PN}-compiler"
 
-S = "${WORKDIR}/git"
 SRCREV_grpc = "e5ae3b6b44bf3b64d24bfb4b4f82556239b986db"
 BRANCH = "v1.60.x"
 SRC_URI = "gitsm://github.com/grpc/grpc.git;protocol=https;name=grpc;branch=${BRANCH} \

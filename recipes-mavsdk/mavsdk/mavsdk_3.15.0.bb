@@ -18,7 +18,6 @@ SRC_URI = "git://github.com/mavlink/MAVSDK.git;protocol=https;branch=main \
 PV = "v3.15.0+git"
 SRCREV = "721efdc45eedfe8761ceb7280dedca6004b1ea92"
 
-S = "${WORKDIR}/git"
 
 DEPENDS = " \
     mavlink-mavsdk-thirdparty  \
