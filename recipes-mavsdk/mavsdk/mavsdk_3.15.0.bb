@@ -47,3 +47,10 @@ PACKAGECONFIG[mavsdk-server] = "-DBUILD_MAVSDK_SERVER=ON,-DBUILD_MAVSDK_SERVER=O
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
 EXTRA_OECMAKE += " -DSUPERBUILD=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DMAVLINK_DIALECT=ardupilotmega -DDEPS_INSTALL_PATH:STRING=${RECIPE_SYSROOT}/usr"
 
+do_install:append() {
+    # CMake export leaks an absolute sysroot include path into MAVSDKTargets.cmake,
+    # which triggers do_package_qa [buildpaths]. Keep only relocatable import paths.
+    sed -i -e "s#${RECIPE_SYSROOT}/usr/include;##g" \
+        ${D}${libdir}/cmake/MAVSDK/MAVSDKTargets.cmake
+}
+
