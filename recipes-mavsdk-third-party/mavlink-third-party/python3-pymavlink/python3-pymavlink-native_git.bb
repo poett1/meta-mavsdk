@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6ea13ec5f0f3dd35ac5b53afdc3ed9ff \
 
 SRC_URI = "gitsm://github.com/mavlink/mavlink.git;protocol=https;branch=master"
 
-inherit setuptools3 native
+inherit python_setuptools_build_meta native
 
 PV = "1.0+git"
 SRCREV = "b401fe0238b9647f8ea18d58d9e968b79b347916"
