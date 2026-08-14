@@ -1,0 +1,89 @@
+From 64fb3dd441a36879fde1fb4778834829c5dc3b6d Mon Sep 17 00:00:00 2001
+From: Patrick Oetken <patrick.oetken@skylance.tech>
+Date: Fri, 14 Aug 2026 07:16:24 +0000
+Subject: [PATCH] core: wake the work thread when a message is queued for
+ sending
+
+Outgoing messages are pushed onto _messages_to_send and drained by the work
+thread, whose wait is signalled only by incoming traffic and otherwise
+bounded by a 10 ms timeout. A send therefore waits for that timeout even
+when the thread is idle. Measured end to end on a Raspberry Pi 5 sending
+GIMBAL_MANAGER_SET_PITCHYAW at 50 Hz over UDP: p50 6.57 ms, p95 11.01 ms,
+max 16.88 ms.
+
+Set an atomic flag when a message is queued, notify the condition variable,
+and include the flag in the wait predicate, clearing it once the outgoing
+queue drains. After: p50 1.28 ms, p95 2.45 ms, max 7.13 ms.
+
+The flag is deliberately atomic rather than guarded by
+_received_messages_mutex. process_messages() holds that mutex for its entire
+loop while dispatching to plugins, so a plugin replying with a send would
+re-enter send_message and re-lock a non-recursive mutex. Guarding the flag
+would deadlock on the first command ACK or parameter retry. The cost of the
+lock-free version is a rare lost wakeup, which merely defers that one
+message to the existing timeout.
+---
+ src/mavsdk/core/mavsdk_impl.cpp | 12 +++++++++++-
+ src/mavsdk/core/mavsdk_impl.h   |  7 +++++++
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/src/mavsdk/core/mavsdk_impl.cpp b/src/mavsdk/core/mavsdk_impl.cpp
+index 6b20996..8042d12 100644
+--- a/src/mavsdk/core/mavsdk_impl.cpp
++++ b/src/mavsdk/core/mavsdk_impl.cpp
+@@ -664,6 +664,12 @@ bool MavsdkImpl::send_message(mavlink_message_t& message)
+         _messages_to_send.push(std::move(message_copy));
+     }
+ 
++    // Wake the work thread now rather than letting the outgoing message wait for
++    // the next 10 ms timeout. No mutex is taken here on purpose: see the
++    // declaration of _has_outgoing.
++    _has_outgoing.store(true, std::memory_order_release);
++    _received_messages_cv.notify_one();
++
+     // For heartbeat messages, we want to process them immediately to speed up system discovery
+     if (message.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+         // Trigger message processing in the work thread
+@@ -686,6 +692,9 @@ void MavsdkImpl::deliver_messages()
+             }
+             message = _messages_to_send.front();
+             _messages_to_send.pop();
++            if (_messages_to_send.empty()) {
++                _has_outgoing.store(false, std::memory_order_release);
++            }
+         }
+         deliver_message(message);
+     }
+@@ -1226,7 +1235,8 @@ void MavsdkImpl::work_thread()
+         if (_received_messages.empty()) {
+             // No messages to process, wait for a signal or timeout
+             _received_messages_cv.wait_for(lock_received, std::chrono::milliseconds(10), [this]() {
+-                return !_received_messages.empty() || _should_exit;
++                return !_received_messages.empty() ||
++                       _has_outgoing.load(std::memory_order_acquire) || _should_exit;
+             });
+         }
+     }
+diff --git a/src/mavsdk/core/mavsdk_impl.h b/src/mavsdk/core/mavsdk_impl.h
+index b56dad8..1d35003 100644
+--- a/src/mavsdk/core/mavsdk_impl.h
++++ b/src/mavsdk/core/mavsdk_impl.h
+@@ -298,6 +298,13 @@ private:
+     std::queue<ReceivedLibmavMessage> _received_libmav_messages;
+     std::condition_variable _received_libmav_messages_cv{};
+ 
++    // Set when an outgoing message is queued, so the work thread's wait can be
++    // woken for sends and not only for receives. Deliberately atomic rather than
++    // guarded by _received_messages_mutex: process_messages() holds that mutex
++    // while dispatching to plugins, and any plugin replying with a send would
++    // then re-lock it and deadlock. The cost is a rare lost wakeup, which merely
++    // defers that one message to the existing 10 ms timeout.
++    std::atomic<bool> _has_outgoing{false};
+     mutable std::mutex _messages_to_send_mutex{};
+     std::queue<mavlink_message_t> _messages_to_send;
+ 
+
+base-commit: 721efdc45eedfe8761ceb7280dedca6004b1ea92
+-- 
+2.47.3
+
