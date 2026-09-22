@@ -1,8 +1,6 @@
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=277ac5bc231af240c801ade17211246a"
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/patches:"
-
 SRC_URI = "git://github.com/julianoes/PicoSHA2;protocol=https;branch=cmake-install-support"
 
 PV = "1.0+git"
