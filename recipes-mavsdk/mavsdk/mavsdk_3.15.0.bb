@@ -16,7 +16,6 @@ SRC_URI = "git://github.com/mavlink/MAVSDK.git;protocol=https;branch=main;name=m
            file://0001-FIX-LibLZMA-not-found.patch \
            file://0002-FIX-find-jsoncpp-using-pkgconfig.patch \
            file://0005-FIX-mavlink-headers-not-found.patch \
-           file://0006-FIX-MAVLINK_MSG_ID_PARAM_ERROR-not-found.patch \
            file://0001-core-wake-the-work-thread-when-a-message-is-queued-fo.patch \
            "
 
