@@ -1,3 +1,5 @@
+SUMMARY = "Generated MAVLink C headers, ardupilotmega dialect"
+HOMEPAGE = "https://mavlink.io"
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 LICENSE = "Apache-2.0"
@@ -10,7 +12,11 @@ SRC_URI = "gitsm://github.com/mavlink/mavlink.git;protocol=https;branch=master"
 
 SRC_URI += "file://0001-Pymavlink-as-yocto-dependency.patch"
 
-PV = "1.0+git"
+# The C library carries no release tags; 2.0 is MAVLINK_VERSION, the protocol
+# version the CMake package exports. The pin is this layer's own and older
+# (2024-12) than the MAVLINK_HASH MAVSDK 3.15.0 pins (2025-11); patch 0006 on
+# mavsdk papers over one missing message id that results from this.
+PV = "2.0+git"
 SRCREV = "5e3a42b8f3f53038f2779f9f69bd64767b913bb8"
 
 S = "${WORKDIR}/git"
