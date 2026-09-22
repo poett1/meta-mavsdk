@@ -10,7 +10,8 @@ SRC_URI = "gitsm://github.com/mavlink/mavlink.git;protocol=https;branch=master"
 
 inherit python_setuptools_build_meta native
 
-PV = "1.0+git"
+# The pymavlink submodule at this mavlink commit is v2.4.49 plus 26 commits.
+PV = "2.4.49+git"
 SRCREV = "b401fe0238b9647f8ea18d58d9e968b79b347916"
 
 S = "${UNPACKDIR}/${BP}/pymavlink"

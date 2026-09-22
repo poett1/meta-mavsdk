@@ -1,9 +1,12 @@
+SUMMARY = "PX4/MAVLink events library, C++ part"
+HOMEPAGE = "https://github.com/mavlink/libevents"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${UNPACKDIR}/${BP}/LICENSE.md;md5=92eb10e2bbc58e0d704de5f23dd755ef"
 
 SRC_URI = "git://github.com/mavlink/libevents.git;protocol=https;branch=main"
 
-PV = "1.0+git"
+# libevents has no releases or version in its build files. Pin matches MAVSDK 3.15.0.
+PV = "0.0+git"
 SRCREV = "7c1720749dfe555ec2e71d5f9f753e6ac1244e1c"
 
 S = "${UNPACKDIR}/${BP}/libs/cpp"
