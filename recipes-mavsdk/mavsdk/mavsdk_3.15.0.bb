@@ -15,7 +15,6 @@ SRC_URI = "git://github.com/mavlink/MAVSDK.git;protocol=https;branch=main;name=m
            git://github.com/mavlink/MAVSDK-Proto.git;protocol=https;branch=main;name=proto;destsuffix=${BP}/proto \
            file://0001-FIX-LibLZMA-not-found.patch \
            file://0002-FIX-find-jsoncpp-using-pkgconfig.patch \
-           file://0005-FIX-mavlink-headers-not-found.patch \
            file://0001-core-wake-the-work-thread-when-a-message-is-queued-fo.patch \
            "
 
@@ -67,14 +66,6 @@ EXTRA_OECMAKE += " \
     -DMAVLINK_DIALECT=ardupilotmega \
     -DDEPS_INSTALL_PATH:STRING=${RECIPE_SYSROOT}/usr \
 "
-
-do_install:append() {
-    # 0005-FIX-mavlink-headers-not-found.patch adds the sysroot MAVLink include
-    # dir as a plain PUBLIC include, so the export carries the absolute sysroot
-    # path into MAVSDKTargets.cmake, which trips do_package_qa [buildpaths].
-    sed -i -e "s#${RECIPE_SYSROOT}/usr/include;##g" \
-        ${D}${libdir}/cmake/MAVSDK/MAVSDKTargets.cmake
-}
 
 PACKAGE_BEFORE_PN = "${PN}-server"
 # MAVSDKTargets.cmake exports MAVSDK::mavsdk_server_bin, and CMake refuses to
