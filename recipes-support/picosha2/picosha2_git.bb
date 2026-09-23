@@ -11,5 +11,3 @@ PV = "1.0.1+git"
 SRCREV = "1bf940d8a03bb752604fbb366d47b97b50b9e6ce"
 
 inherit cmake
-
-EXTRA_OECMAKE = ""
