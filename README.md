@@ -22,6 +22,14 @@ from openembedded-core and meta-oe. Do not add copies of those here: two recipes
 installing the same library into one sysroot is exactly the conflict this layer
 avoids.
 
+## Bumping MAVSDK
+
+All source pins live in `recipes-mavsdk/mavsdk-pins.inc`: MAVSDK itself, its
+`proto` submodule, and the mavlink, libmavlike, libevents and picosha2
+revisions MAVSDK's superbuild names in `third_party/`. Update them together.
+The mavsdk recipe compares them against the MAVSDK source in `do_configure`
+and stops the build with the expected value if any of them drifted.
+
 ## Usage
 
 Add the layer to `bblayers.conf` together with `meta-oe`, then depend on `mavsdk`
