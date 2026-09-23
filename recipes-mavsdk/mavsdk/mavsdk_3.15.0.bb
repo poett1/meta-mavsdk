@@ -18,10 +18,11 @@ SRC_URI = "git://github.com/mavlink/MAVSDK.git;protocol=https;branch=main;name=m
            file://0001-core-wake-the-work-thread-when-a-message-is-queued-fo.patch \
            "
 
+require recipes-mavsdk/mavsdk-pins.inc
+
 PV = "v3.15.0+git"
-SRCREV_mavsdk = "721efdc45eedfe8761ceb7280dedca6004b1ea92"
-# Must match the 'proto' submodule commit of SRCREV_mavsdk.
-SRCREV_proto = "d274275a9bb15259959c6224e76bf2cbed5a9dff"
+SRCREV_mavsdk = "${MAVSDK_SRCREV}"
+SRCREV_proto = "${MAVSDK_PROTO_SRCREV}"
 SRCREV_FORMAT = "mavsdk_proto"
 
 S = "${WORKDIR}/git"
@@ -43,15 +44,40 @@ inherit cmake pkgconfig
 PACKAGECONFIG ??= ""
 PACKAGECONFIG[mavsdk-server] = "-DBUILD_MAVSDK_SERVER=ON,-DBUILD_MAVSDK_SERVER=OFF,grpc grpc-native protobuf protobuf-native abseil-cpp c-ares re2 zlib"
 
+# Stop the build when mavsdk-pins.inc drifts from the revisions this MAVSDK
+# was released with (its superbuild pins and the proto submodule).
+mavsdk_check_pin() {
+    if [ "$2" != "$3" ]; then
+        bbfatal "mavsdk-pins.inc: $1 is $3, but MAVSDK ${MAVSDK_SRCREV} pins $2. Update mavsdk-pins.inc."
+    fi
+}
+
+check_mavsdk_pins() {
+    tp="${S}/third_party"
+    mavsdk_check_pin MAVSDK_MAVLINK_SRCREV \
+        "$(sed -n 's/.*set(MAVLINK_HASH "\([0-9a-f]*\)".*/\1/p' "$tp/CMakeLists.txt")" \
+        "${MAVSDK_MAVLINK_SRCREV}"
+    mavsdk_check_pin MAVSDK_LIBMAVLIKE_SRCREV \
+        "$(awk '$1 == "GIT_TAG" { print $2; exit }' "$tp/libmavlike/CMakeLists.txt")" \
+        "${MAVSDK_LIBMAVLIKE_SRCREV}"
+    mavsdk_check_pin MAVSDK_LIBEVENTS_SRCREV \
+        "$(awk '$1 == "GIT_TAG" { print $2; exit }' "$tp/libevents/CMakeLists.txt")" \
+        "${MAVSDK_LIBEVENTS_SRCREV}"
+    mavsdk_check_pin MAVSDK_PICOSHA2_BRANCH \
+        "$(awk '$1 == "GIT_TAG" { print $2; exit }' "$tp/picosha2/CMakeLists.txt")" \
+        "${MAVSDK_PICOSHA2_BRANCH}"
+    mavsdk_check_pin MAVSDK_PROTO_SRCREV \
+        "$(git -C "${S}" ls-tree HEAD proto | awk '{ print $3 }')" \
+        "${MAVSDK_PROTO_SRCREV}"
+}
+
 # The checked-in protobuf/gRPC gencode under src/mavsdk_server/src/generated is
 # produced by protobuf 29.1 and only compiles against that exact runtime.
-# Regenerate it with the distro protoc so it matches the distro protobuf.
+# Regenerate it with the distro protoc so it matches the distro protobuf,
+# after checking the pins.
 do_configure:prepend() {
+    check_mavsdk_pins
     if ${@bb.utils.contains('PACKAGECONFIG', 'mavsdk-server', 'true', 'false', d)}; then
-        pinned=$(git -C "${S}" ls-tree HEAD proto | awk '{ print $3 }')
-        if [ "$pinned" != "${SRCREV_proto}" ]; then
-            bbfatal "SRCREV_proto is ${SRCREV_proto}, but MAVSDK at ${SRCREV_mavsdk} pins proto at $pinned"
-        fi
         protos="${S}/proto/protos"
         gen="${S}/src/mavsdk_server/src/generated"
         for proto in "${protos}"/mavsdk_options.proto "${protos}"/*/*.proto; do
