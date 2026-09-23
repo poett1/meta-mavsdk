@@ -1,103 +1,62 @@
-# `meta-mavsdk`
+# meta-mavsdk
 
-A Yocto/OpenEmbedded layer providing deterministic and highly-controlled recipes for the third-party dependencies required to build the MAVSDK library.
+Yocto/OpenEmbedded layer for the [MAVSDK](https://mavsdk.mavlink.io) C++ library.
 
-The primary goal of this layer is to provide **statically linked** versions of critical dependencies, ensuring MAVSDK can be robustly integrated into embedded systems without common shared library conflicts.
+MAVSDK's own build vendors every dependency through a CMake superbuild. This
+layer builds with `SUPERBUILD=OFF` and takes the dependencies from the distro
+(openembedded-core and meta-oe). Only the few libraries no other layer provides
+are carried here.
 
------
+## Recipes
 
-## 🚀 Quick Start
+| Recipe | What it is |
+| :--- | :--- |
+| `recipes-mavsdk/mavsdk/mavsdk_3.15.0.bb` | MAVSDK library, optional `mavsdk_server` |
+| `recipes-support/mavlink-headers/mavlink-headers_git.bb` | Generated MAVLink C headers (ardupilotmega dialect), using the pymavlink submodule of the same mavlink commit |
+| `recipes-support/libmavlike/libmavlike_git.bb` | MAVLink helper library used by MAVSDK |
+| `recipes-support/libevents/libevents_git.bb` | PX4/MAVLink events library |
+| `recipes-support/picosha2/picosha2_git.bb` | Header-only SHA-256 |
 
-To use this layer, you need a functioning Yocto environment (e.g., set up with `poky`).
+Everything else (curl, openssl, xz, jsoncpp, tinyxml2, grpc, protobuf, ...) comes
+from openembedded-core and meta-oe. Do not add copies of those here: two recipes
+installing the same library into one sysroot is exactly the conflict this layer
+avoids.
 
-### 1\. Clone the Layer
+## Bumping MAVSDK
 
-Clone this repository into your Yocto build directory (e.g., alongside `poky`, `meta-openembedded`, etc.):
+All source pins live in `recipes-mavsdk/mavsdk-pins.inc`: MAVSDK itself, its
+`proto` submodule, and the mavlink, libmavlike, libevents and picosha2
+revisions MAVSDK's superbuild names in `third_party/`. Update them together.
+The mavsdk recipe compares them against the MAVSDK source in `do_configure`
+and stops the build with the expected value if any of them drifted.
 
-```bash
-git clone https://github.com/piotrbetlej/meta-mavsdk.git
+## Usage
+
+Add the layer to `bblayers.conf` together with `meta-oe`, then depend on `mavsdk`
+from your recipe or add it to the image:
+
 ```
-
-### 2\. Add the Layer to `bblayers.conf`
-
-Edit your `bblayers.conf` file to include the `meta-mavsdk` layer path:
-
-```bash
-# BBLAYERS ?= " \
-#   /path/to/poky/meta \
-#   /path/to/poky/meta-poky \
-#   ...
-BBLAYERS ?= " \
-  /path/to/poky/meta \
-  /path/to/poky/meta-poky \
-  /path/to/meta-mavsdk \
-  "
-```
-
-### 3\. Build Your Target Image
-
-Once integrated, you can include the final `mavsdk` recipe (which would depend on these third-party recipes) in your image:
-
-```bash
-# Add MAVSDK to your local.conf or an image recipe
 IMAGE_INSTALL:append = " mavsdk"
-
-# Build your image
-bitbake core-image-minimal
 ```
 
------
+### mavsdk_server
 
-## ✨ Key Features
+The gRPC server is off by default. Enable it with
 
-  * **Static Linking Focus:** All C/C++ library recipes are explicitly configured to build as **static libraries (`.a`)** (e.g., `-DBUILD_SHARED_LIBS=OFF`). This is crucial for MAVSDK's Superbuild-less integration, allowing the final MAVSDK library to bundle its dependencies safely.
-  * **Deterministic Builds:** All recipes are pinned to specific Git revision (`SRCREV`) hashes or source tarballs with `SHA256` checksums, guaranteeing reproducible and stable builds.
-  * **Security Patches:** Major dependencies like `openssl` and `curl` include critical security patches (e.g., recent CVE fixes) to ensure the integrated dependencies are secure.
-  * **Cross-Compilation Ready:** Dependencies like **Protobuf** and **MAVLink** correctly handle the complex requirement of needing **native tools** (e.g., `protoc`, `pymavlink`) to run on the host build machine to generate code for the target.
+```
+PACKAGECONFIG:append:pn-mavsdk = " mavsdk-server"
+```
 
------
+which pulls grpc and protobuf from meta-oe and produces the `mavsdk-server`
+package. MAVSDK ships protobuf gencode for protobuf 29.1, which only compiles against that
+exact runtime. The recipe regenerates it with the distro protoc during
+`do_configure`, so the server matches whatever protobuf meta-oe provides.
 
-## ✅ Tested & Proven
+## Branches
 
-We have successfully cross-compiled and tested images utilizing these recipes across diverse architectures, confirming the stability and integrity of the static builds:
+`scarthgap` and `wrynose` follow the Yocto release they are named after.
 
-| Architecture | Example Target Device | Status |
-| :--- | :--- | :--- |
-| **x86-64** | Standard PC/Server (QEMU, General PURPOSE) | **PASS** |
-| **aarch64** | Radxa Zero 3W (Rockchip RK3566) | **PASS** |
+## License
 
-The recipes are optimized to ensure **low footprint** and **high reliability** for embedded systems like companion computers on drones.
-
------
-
-## 📦 Contained Recipes (`recipes-mavsdk/`)
-
-This layer provides tightly-controlled recipes for core MAVSDK dependencies.
-
-| Recipe File | Package | Version / Source Pin | Notes |
-| :--- | :--- | :--- | :--- |
-| `c-ares-mavsdk-thirdparty_1.27.0.bb` | `c-ares` | `1.27.0` | Asynchronous DNS resolver. Statically built with PIC enabled. |
-| `curl-mavsdk-thirdparty_8.7.1.bb` | `curl` | `8.7.1` | Used for HTTP/HTTPS transfers. Includes multiple recent CVE patches. |
-| `libjsoncpp-mavsdk-thirdparty_git.bb` | `libjsoncpp` | Git (`89e2973c...`) | C++ library for reading/writing JSON data. |
-| `liblzma-mavsdk-thirdparty_5.4.5.bb` | `liblzma` (XZ) | `5.4.5` | Compression library dependency. |
-| `libtinyxml2-mavsdk-thirdparty_9.0.0.bb` | `libtinyxml2` | `9.0.0` | Small, efficient C++ XML parser. |
-| `mavlink-mavsdk-thirdparty_git.bb` | `mavlink` | Git (`5e3a42b8...`) | MAVLink message headers and generator tooling. Depends on `python3-pymavlink-native`. |
-| `openssl-mavsdk-thirdparty_3.2.6.bb` | `openssl` | `3.2.6` | The essential SSL/TLS and cryptographic library. Includes CVE-2024-41996 patch. |
-| `picosha2-mavsdk-thirdparty_git.bb` | `picosha2` | Git (`1bf940d8...`) | Header-only SHA-256 implementation. |
-| `protobuf-mavsdk-thirdparty_29.1.bb` | `protobuf` | `29.1` | Google's Protocol Buffers. Correctly handles `protoc-native` cross-compilation. |
-| `zlib-ng-mavsdk-thirdparty_2.1.6.bb` | `zlib-ng` | `2.1.6` | A next-generation, performance-optimized zlib replacement. |
-
------
-
-## 🤝 Dependencies
-
-This layer has dependencies on layers typically found in the OpenEmbedded community:
-
-  * **`poky`**
-  * **`meta-oe`**
-
-Please ensure these layers are available and referenced in your `bblayers.conf` before including `meta-mavsdk`.
-
-## 📜 License
-
-All recipes are provided under the MIT License, but the licenses for the software they build are retained from the upstream sources. Please check the `LIC_FILES_CHKSUM` variable within each recipe for specific component licensing information.
+Recipes are MIT (see `COPYING.MIT`). The software they build keeps its upstream
+license, see `LIC_FILES_CHKSUM` in each recipe.

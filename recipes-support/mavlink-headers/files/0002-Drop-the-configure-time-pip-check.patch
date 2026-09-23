@@ -1,0 +1,39 @@
+From 278268d21176965baef824dc6d858af674b6bf5c Mon Sep 17 00:00:00 2001
+From: Patrick Oetken <patrick.oetken@skylance.tech>
+Date: Wed, 23 Sep 2026 11:26:43 +0200
+Subject: [PATCH] Drop the configure-time pip check
+
+The pip install step is already removed for Yocto, where the generator's
+Python dependencies come from native recipes. Checking for pip would only
+make configure fail with a Python that has none.
+
+Upstream-Status: Inappropriate [Yocto-specific, pairs with the previous patch]
+---
+ CMakeLists.txt | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9dd09193..46b54c06 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,17 +4,6 @@ project(mavlink)
+ 
+ find_package(Python COMPONENTS Interpreter REQUIRED)
+ 
+-# We automatically install the pip dependencies locally below.
+-# Therefore, we check whether pip is available here.
+-execute_process(
+-    COMMAND ${Python_EXECUTABLE} -m pip -V
+-    RESULT_VARIABLE EXIT_CODE
+-    OUTPUT_QUIET
+-)
+-if (NOT ${EXIT_CODE} EQUAL 0)
+-    message(FATAL_ERROR "Python pip not found, pip is required")
+-endif()
+-
+ if (NOT MAVLINK_DIALECT)
+     set(MAVLINK_DIALECT common)
+ endif()
+-- 
+2.43.0
+
