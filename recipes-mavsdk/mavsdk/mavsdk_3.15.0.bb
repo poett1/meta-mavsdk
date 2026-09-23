@@ -16,6 +16,7 @@ SRC_URI = "git://github.com/mavlink/MAVSDK.git;protocol=https;branch=main;name=m
            file://0001-FIX-LibLZMA-not-found.patch \
            file://0002-FIX-find-jsoncpp-using-pkgconfig.patch \
            file://0001-core-wake-the-work-thread-when-a-message-is-queued-fo.patch \
+           file://0003-mavsdk_server-include-cstdint-for-uint8_t.patch \
            "
 
 require recipes-mavsdk/mavsdk-pins.inc

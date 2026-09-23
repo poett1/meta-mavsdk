@@ -1,0 +1,32 @@
+From 679392012b91766ad168c88156e7a39c2cfba067 Mon Sep 17 00:00:00 2001
+From: Patrick Oetken <patrick.oetken@gmail.com>
+Date: Wed, 23 Sep 2026 15:47:30 +0200
+Subject: [PATCH] mavsdk_server: include <cstdint> for uint8_t
+
+mavsdk_server.h uses uint8_t in setMavlinkIds() but relies on another
+header to pull in <cstdint>. GCC 15's libstdc++ no longer does that via
+<memory> or <string>, so the server fails to build:
+
+  mavsdk_server.h:19:24: error: 'uint8_t' has not been declared
+
+Still present on main as cpp/src/mavsdk_server/src/mavsdk_server.hpp.
+
+Upstream-Status: Pending
+---
+ src/mavsdk_server/src/mavsdk_server.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/mavsdk_server/src/mavsdk_server.h b/src/mavsdk_server/src/mavsdk_server.h
+index c6f7d5f13..37d0fa093 100644
+--- a/src/mavsdk_server/src/mavsdk_server.h
++++ b/src/mavsdk_server/src/mavsdk_server.h
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include <cstdint>
+ #include <memory>
+ #include <string>
+ 
+-- 
+2.43.0
+
