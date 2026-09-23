@@ -37,7 +37,6 @@ DEPENDS = " \
     jsoncpp \
     curl \
     xz \
-    pkgconfig-native \
 "
 
 inherit cmake pkgconfig
@@ -50,6 +49,10 @@ PACKAGECONFIG[mavsdk-server] = "-DBUILD_MAVSDK_SERVER=ON,-DBUILD_MAVSDK_SERVER=O
 # Regenerate it with the distro protoc so it matches the distro protobuf.
 do_configure:prepend() {
     if ${@bb.utils.contains('PACKAGECONFIG', 'mavsdk-server', 'true', 'false', d)}; then
+        pinned=$(git -C "${S}" ls-tree HEAD proto | awk '{ print $3 }')
+        if [ "$pinned" != "${SRCREV_proto}" ]; then
+            bbfatal "SRCREV_proto is ${SRCREV_proto}, but MAVSDK at ${SRCREV_mavsdk} pins proto at $pinned"
+        fi
         protos="${S}/proto/protos"
         gen="${S}/src/mavsdk_server/src/generated"
         for proto in "${protos}"/mavsdk_options.proto "${protos}"/*/*.proto; do
@@ -68,11 +71,15 @@ EXTRA_OECMAKE += " \
 "
 
 do_install:append() {
-    # The CMake export leaks the absolute sysroot include path (DEPS_INSTALL_PATH)
-    # into MAVSDKTargets.cmake, which trips do_package_qa [buildpaths].
+    # 0005-FIX-mavlink-headers-not-found.patch adds the sysroot MAVLink include
+    # dir as a plain PUBLIC include, so the export carries the absolute sysroot
+    # path into MAVSDKTargets.cmake, which trips do_package_qa [buildpaths].
     sed -i -e "s#${RECIPE_SYSROOT}/usr/include;##g" \
         ${D}${libdir}/cmake/MAVSDK/MAVSDKTargets.cmake
 }
 
 PACKAGE_BEFORE_PN = "${PN}-server"
+# MAVSDKTargets.cmake exports MAVSDK::mavsdk_server_bin, and CMake refuses to
+# load the package if that file is missing, so stage it for find_package(MAVSDK).
+SYSROOT_DIRS += "${@bb.utils.contains('PACKAGECONFIG', 'mavsdk-server', '${bindir}', '', d)}"
 FILES:${PN}-server = "${bindir}/mavsdk_server ${libdir}/libmavsdk_server${SOLIBS}"
