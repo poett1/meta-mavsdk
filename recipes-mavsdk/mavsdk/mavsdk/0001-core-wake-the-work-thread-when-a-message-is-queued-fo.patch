@@ -22,6 +22,8 @@ re-enter send_message and re-lock a non-recursive mutex. Guarding the flag
 would deadlock on the first command ACK or parameter retry. The cost of the
 lock-free version is a rare lost wakeup, which merely defers that one
 message to the existing timeout.
+
+Upstream-Status: Pending
 ---
  src/mavsdk/core/mavsdk_impl.cpp | 12 +++++++++++-
  src/mavsdk/core/mavsdk_impl.h   |  7 +++++++
