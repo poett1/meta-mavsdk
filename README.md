@@ -12,12 +12,10 @@ are carried here.
 | Recipe | What it is |
 | :--- | :--- |
 | `recipes-mavsdk/mavsdk/mavsdk_3.15.0.bb` | MAVSDK library, optional `mavsdk_server` |
-| `recipes-support/mavlink-headers/mavlink-headers_git.bb` | Generated MAVLink C headers (ardupilotmega dialect) |
+| `recipes-support/mavlink-headers/mavlink-headers_git.bb` | Generated MAVLink C headers (ardupilotmega dialect), using the pymavlink submodule of the same mavlink commit |
 | `recipes-support/libmavlike/libmavlike_git.bb` | MAVLink helper library used by MAVSDK |
 | `recipes-support/libevents/libevents_git.bb` | PX4/MAVLink events library |
 | `recipes-support/picosha2/picosha2_git.bb` | Header-only SHA-256 |
-| `recipes-devtools/python/python3-pymavlink-native_git.bb` | MAVLink header generator, build host only |
-| `recipes-devtools/python/python3-fastcrc_0.3.3.bb` | pymavlink dependency |
 
 Everything else (curl, openssl, xz, jsoncpp, tinyxml2, grpc, protobuf, ...) comes
 from openembedded-core and meta-oe. Do not add copies of those here: two recipes
