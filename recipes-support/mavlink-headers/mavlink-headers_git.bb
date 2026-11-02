@@ -30,4 +30,5 @@ DEPENDS += "python3-lxml-native"
 
 inherit cmake python3native
 
-EXTRA_OECMAKE += "-DMAVLINK_DIALECT=ardupilotmega -DPython_EXECUTABLE=${PYTHON}"
+# MAVSDK uses only the C headers; its superbuild skips the C++11 ones too.
+EXTRA_OECMAKE += "-DMAVLINK_DIALECT=ardupilotmega -DMAVLINK_ENABLE_CXX=OFF -DPython_EXECUTABLE=${PYTHON}"

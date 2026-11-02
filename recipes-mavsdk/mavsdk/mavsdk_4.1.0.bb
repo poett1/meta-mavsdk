@@ -2,11 +2,14 @@ SUMMARY = "MAVSDK C++ library and optional gRPC server"
 HOMEPAGE = "https://mavsdk.mavlink.io"
 # debian/copyright is only a BSD-3-Clause template, LICENSE.md is the real license.
 LICENSE = "BSD-3-Clause"
-LIC_FILES_CHKSUM = "file://LICENSE.md;md5=84b641454775df91a2bae8fdd450e2e9"
+LIC_FILES_CHKSUM = "file://${UNPACKDIR}/${BP}/LICENSE.md;md5=84b641454775df91a2bae8fdd450e2e9"
 
 # MAVSDK's superbuild vendors every dependency. We build with SUPERBUILD=OFF and
 # take the dependencies from the distro; only what no other layer provides
 # (mavlink headers, libmavlike, libevents, picosha2) lives in this layer.
+#
+# Since 4.0 the repository holds several language bindings; the C++ library
+# and its CMake project live in cpp/.
 #
 # The proto definitions are a submodule pointing at a fork of MAVSDK-Proto, so
 # they are fetched explicitly from the upstream repo at the pinned commit
@@ -14,26 +17,30 @@ LIC_FILES_CHKSUM = "file://LICENSE.md;md5=84b641454775df91a2bae8fdd450e2e9"
 SRC_URI = "git://github.com/mavlink/MAVSDK.git;protocol=https;branch=main;name=mavsdk \
            git://github.com/mavlink/MAVSDK-Proto.git;protocol=https;branch=main;name=proto;destsuffix=${BP}/proto \
            file://0001-FIX-LibLZMA-not-found.patch \
-           file://0002-FIX-find-jsoncpp-using-pkgconfig.patch \
-           file://0001-core-wake-the-work-thread-when-a-message-is-queued-fo.patch \
            file://0003-mavsdk_server-include-cstdint-for-uint8_t.patch \
            "
 
 require recipes-mavsdk/mavsdk-pins.inc
 
-PV = "v3.15.0+git"
+PV = "v4.1.0+git"
 SRCREV_mavsdk = "${MAVSDK_SRCREV}"
 SRCREV_proto = "${MAVSDK_PROTO_SRCREV}"
 SRCREV_FORMAT = "mavsdk_proto"
 
-# Core library: src/mavsdk/CMakeLists.txt and src/CMakeLists.txt at this SRCREV.
+S = "${UNPACKDIR}/${BP}/cpp"
+
+# Core library: cpp/src/mavsdk/CMakeLists.txt and cpp/src/CMakeLists.txt at
+# this SRCREV. asio is the standalone header-only library; MAVSDK's own
+# Findasio.cmake falls back to the plain headers meta-oe installs.
 DEPENDS = " \
     mavlink-headers \
     libmavlike \
     libevents \
     picosha2 \
     libtinyxml2 \
-    jsoncpp \
+    nlohmann-json \
+    asio \
+    fmt \
     curl \
     xz \
 "
@@ -57,7 +64,7 @@ check_mavsdk_pins() {
         "$(sed -n 's/.*set(MAVLINK_HASH "\([0-9a-f]*\)".*/\1/p' "$tp/CMakeLists.txt")" \
         "${MAVSDK_MAVLINK_SRCREV}"
     mavsdk_check_pin MAVSDK_LIBMAVLIKE_SRCREV \
-        "$(awk '$1 == "GIT_TAG" { print $2; exit }' "$tp/libmavlike/CMakeLists.txt")" \
+        "$(sed -n 's/.*set(LIBMAVLIKE_HASH "\([0-9a-f]*\)".*/\1/p' "$tp/CMakeLists.txt")" \
         "${MAVSDK_LIBMAVLIKE_SRCREV}"
     mavsdk_check_pin MAVSDK_LIBEVENTS_SRCREV \
         "$(awk '$1 == "GIT_TAG" { print $2; exit }' "$tp/libevents/CMakeLists.txt")" \
@@ -66,7 +73,7 @@ check_mavsdk_pins() {
         "$(awk '$1 == "GIT_TAG" { print $2; exit }' "$tp/picosha2/CMakeLists.txt")" \
         "${MAVSDK_PICOSHA2_BRANCH}"
     mavsdk_check_pin MAVSDK_PROTO_SRCREV \
-        "$(git -C "${S}" ls-tree HEAD proto | awk '{ print $3 }')" \
+        "$(git -C "${S}" ls-tree --full-tree HEAD proto | awk '{ print $3 }')" \
         "${MAVSDK_PROTO_SRCREV}"
 }
 
@@ -77,7 +84,7 @@ check_mavsdk_pins() {
 do_configure:prepend() {
     check_mavsdk_pins
     if ${@bb.utils.contains('PACKAGECONFIG', 'mavsdk-server', 'true', 'false', d)}; then
-        protos="${S}/proto/protos"
+        protos="${UNPACKDIR}/${BP}/proto/protos"
         gen="${S}/src/mavsdk_server/src/generated"
         for proto in "${protos}"/mavsdk_options.proto "${protos}"/*/*.proto; do
             protoc -I "${protos}" --cpp_out="${gen}" --grpc_out="${gen}" \
