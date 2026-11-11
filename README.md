@@ -11,13 +11,14 @@ are carried here.
 
 | Recipe | What it is |
 | :--- | :--- |
-| `recipes-mavsdk/mavsdk/mavsdk_3.15.0.bb` | MAVSDK library, optional `mavsdk_server` |
+| `recipes-mavsdk/mavsdk/mavsdk_4.1.0.bb` | MAVSDK library, optional `mavsdk_server`, built from the poett1/MAVSDK timesync fork |
 | `recipes-support/mavlink-headers/mavlink-headers_git.bb` | Generated MAVLink C headers (ardupilotmega dialect), using the pymavlink submodule of the same mavlink commit |
 | `recipes-support/libmavlike/libmavlike_git.bb` | MAVLink helper library used by MAVSDK |
 | `recipes-support/libevents/libevents_git.bb` | PX4/MAVLink events library |
 | `recipes-support/picosha2/picosha2_git.bb` | Header-only SHA-256 |
 
-Everything else (curl, openssl, xz, jsoncpp, tinyxml2, grpc, protobuf, ...) comes
+Everything else (curl, openssl, xz, nlohmann-json, asio, fmt, tinyxml2, grpc,
+protobuf, ...) comes
 from openembedded-core and meta-oe. Do not add copies of those here: two recipes
 installing the same library into one sysroot is exactly the conflict this layer
 avoids.
@@ -26,7 +27,7 @@ avoids.
 
 All source pins live in `recipes-mavsdk/mavsdk-pins.inc`: MAVSDK itself, its
 `proto` submodule, and the mavlink, libmavlike, libevents and picosha2
-revisions MAVSDK's superbuild names in `third_party/`. Update them together.
+revisions MAVSDK's superbuild names in `cpp/third_party/`. Update them together.
 The mavsdk recipe compares them against the MAVSDK source in `do_configure`
 and stops the build with the expected value if any of them drifted.
 

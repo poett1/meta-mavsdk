@@ -3,23 +3,24 @@ From: Patrick Oetken <patrick.oetken@gmail.com>
 Date: Wed, 23 Sep 2026 15:47:30 +0200
 Subject: [PATCH] mavsdk_server: include <cstdint> for uint8_t
 
-mavsdk_server.h uses uint8_t in setMavlinkIds() but relies on another
-header to pull in <cstdint>. GCC 15's libstdc++ no longer does that via
-<memory> or <string>, so the server fails to build:
+mavsdk_server.hpp uses uint8_t and uint32_t in setMavlinkIds() but relies
+on another header to pull in <cstdint>. GCC 15's libstdc++ no longer does
+that via <memory> or <string>, so the server fails to build:
 
-  mavsdk_server.h:19:24: error: 'uint8_t' has not been declared
+  mavsdk_server.hpp: error: 'uint8_t' has not been declared
 
-Still present on main as cpp/src/mavsdk_server/src/mavsdk_server.hpp.
+Refreshed for MAVSDK 4.1.0, where the header is
+cpp/src/mavsdk_server/src/mavsdk_server.hpp (paths below are relative to
+cpp/, the recipe's S).
 
 Upstream-Status: Pending
 ---
- src/mavsdk_server/src/mavsdk_server.h | 1 +
+ src/mavsdk_server/src/mavsdk_server.hpp | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/src/mavsdk_server/src/mavsdk_server.h b/src/mavsdk_server/src/mavsdk_server.h
-index c6f7d5f13..37d0fa093 100644
---- a/src/mavsdk_server/src/mavsdk_server.h
-+++ b/src/mavsdk_server/src/mavsdk_server.h
+diff --git a/src/mavsdk_server/src/mavsdk_server.hpp b/src/mavsdk_server/src/mavsdk_server.hpp
+--- a/src/mavsdk_server/src/mavsdk_server.hpp
++++ b/src/mavsdk_server/src/mavsdk_server.hpp
 @@ -1,5 +1,6 @@
  #pragma once
  
@@ -27,6 +28,3 @@ index c6f7d5f13..37d0fa093 100644
  #include <memory>
  #include <string>
  
--- 
-2.43.0
-
