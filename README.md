@@ -11,7 +11,7 @@ are carried here.
 
 | Recipe | What it is |
 | :--- | :--- |
-| `recipes-mavsdk/mavsdk/mavsdk_4.1.0.bb` | MAVSDK library, optional `mavsdk_server` |
+| `recipes-mavsdk/mavsdk/mavsdk_4.1.0.bb` | MAVSDK library, optional `mavsdk_server`, built from the poett1/MAVSDK timesync fork |
 | `recipes-support/mavlink-headers/mavlink-headers_git.bb` | Generated MAVLink C headers (ardupilotmega dialect), using the pymavlink submodule of the same mavlink commit |
 | `recipes-support/libmavlike/libmavlike_git.bb` | MAVLink helper library used by MAVSDK |
 | `recipes-support/libevents/libevents_git.bb` | PX4/MAVLink events library |
