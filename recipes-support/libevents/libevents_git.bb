@@ -7,7 +7,7 @@ require recipes-mavsdk/mavsdk-pins.inc
 
 SRC_URI = "git://github.com/mavlink/libevents.git;protocol=https;branch=main"
 
-# libevents has no releases or version in its build files. Pin matches MAVSDK 3.15.0.
+# libevents has no releases or version in its build files. Pin matches MAVSDK 4.1.0.
 PV = "0.0+git"
 SRCREV = "${MAVSDK_LIBEVENTS_SRCREV}"
 

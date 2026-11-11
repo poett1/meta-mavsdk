@@ -7,7 +7,7 @@ require recipes-mavsdk/mavsdk-pins.inc
 
 SRC_URI = "gitsm://github.com/julianoes/libmavlike;protocol=https;branch=mavsdk-fork"
 
-# project(mav VERSION 0.1.0) in CMakeLists.txt. Pin matches MAVSDK 3.15.0.
+# project(mav VERSION 0.1.0) in CMakeLists.txt. Pin matches MAVSDK 4.1.0.
 PV = "0.1.0+git"
 SRCREV = "${MAVSDK_LIBMAVLIKE_SRCREV}"
 

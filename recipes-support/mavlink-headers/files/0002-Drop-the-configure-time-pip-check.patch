@@ -1,4 +1,4 @@
-From 278268d21176965baef824dc6d858af674b6bf5c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Patrick Oetken <patrick.oetken@skylance.tech>
 Date: Wed, 23 Sep 2026 11:26:43 +0200
 Subject: [PATCH] Drop the configure-time pip check
@@ -13,7 +13,7 @@ Upstream-Status: Inappropriate [Yocto-specific, pairs with the previous patch]
  1 file changed, 11 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9dd09193..46b54c06 100644
+index ff573c54..360ee1be 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -4,17 +4,6 @@ project(mavlink)
@@ -34,6 +34,3 @@ index 9dd09193..46b54c06 100644
  if (NOT MAVLINK_DIALECT)
      set(MAVLINK_DIALECT common)
  endif()
--- 
-2.43.0
-
