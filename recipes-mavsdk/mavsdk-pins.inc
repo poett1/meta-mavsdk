@@ -6,8 +6,10 @@
 # submodule. When bumping MAVSDK_SRCREV, copy those values here. The mavsdk
 # recipe checks them in do_configure and stops the build on a mismatch.
 
-# MAVSDK v4.1.0
-MAVSDK_SRCREV = "52ea50b52d518b7ff5d550f572c0657b9225c475"
+# MAVSDK v4.1.0-timesync.1: v4.1.0 plus the timesync work on poett1/MAVSDK
+# feat/timesync-estimator (see mavsdk_4.1.0.bb). It touches only
+# cpp/src/mavsdk/core, so every pin below is still the one v4.1.0 names.
+MAVSDK_SRCREV = "3fa7b7d14731c92b48013eb9dc01afbdf0ad4472"
 # 'proto' submodule of MAVSDK_SRCREV
 MAVSDK_PROTO_SRCREV = "2910d567224df6436fc9b15369ef9e448e565262"
 # cpp/third_party/CMakeLists.txt MAVLINK_HASH

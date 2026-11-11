@@ -11,17 +11,26 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/git/LICENSE.md;md5=84b641454775df91a2bae8f
 # Since 4.0 the repository holds several language bindings; the C++ library
 # and its CMake project live in cpp/.
 #
+# MAVSDK comes from the poett1/MAVSDK fork, branch feat/timesync-estimator:
+# v4.1.0 plus the TIMESYNC work (an offset estimate from round-trip bounds
+# exposed as System::timesync_status(), a randomised start-up request
+# schedule, and one-pass clock-step recovery with a thread-safe
+# enable_timesync()). Stock MAVSDK's offset is off by milliseconds against
+# ArduPilot, and rpicam-apps refuses to build against a MAVSDK without
+# timesync_status(). The branch is tagged v4.1.0-timesync.1, so git describe
+# still yields 4.1.0 for the library version and soname.
+#
 # The proto definitions are a submodule pointing at a fork of MAVSDK-Proto, so
 # they are fetched explicitly from the upstream repo at the pinned commit
 # instead of via gitsm://. They are only needed for the mavsdk-server build.
-SRC_URI = "git://github.com/mavlink/MAVSDK.git;protocol=https;branch=main;name=mavsdk \
+SRC_URI = "git://github.com/poett1/MAVSDK.git;protocol=https;branch=feat/timesync-estimator;name=mavsdk \
            git://github.com/mavlink/MAVSDK-Proto.git;protocol=https;branch=main;name=proto;destsuffix=git/proto \
            file://0001-FIX-LibLZMA-not-found.patch \
            "
 
 require recipes-mavsdk/mavsdk-pins.inc
 
-PV = "v4.1.0+git"
+PV = "4.1.0-timesync.1+git"
 SRCREV_mavsdk = "${MAVSDK_SRCREV}"
 SRCREV_proto = "${MAVSDK_PROTO_SRCREV}"
 SRCREV_FORMAT = "mavsdk_proto"
